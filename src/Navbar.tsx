@@ -2,12 +2,7 @@ import { HStack, Link, Text } from '@chakra-ui/react';
 
 const Navbar = () => {
   return (
-    <HStack
-      background="gray.700"
-      paddingX={10}
-      paddingY={3}
-      justify="space-between"
-      align="center">
+    <HStack paddingX={10} paddingY={3} justify="space-between" align="center">
       <Text fontSize="2xl">Kanban App</Text>
       <HStack justify="end" spacing={10}>
         <Text>Kishor Pokharel</Text>
