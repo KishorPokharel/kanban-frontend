@@ -6,13 +6,10 @@ import {
   SimpleGrid,
   Input,
 } from '@chakra-ui/react';
-// import data from './data/board';
 import Navbar from './Navbar';
 import { useEffect, useRef, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { DropResult } from 'react-beautiful-dnd';
-
-// type BoardKey = 'TODO' | 'IN PROGRESS' | 'TESTING' | 'DONE';
 
 interface Board {
   [key: string]: Task[];
@@ -24,8 +21,6 @@ interface Task {
 }
 
 const App = () => {
-  //const board = data as Board;
-
   const [board, setBoard] = useState<Board>({} as Board);
   const newTaskInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -39,11 +34,21 @@ const App = () => {
     ) {
       return;
     }
+
     if (source.droppableId === destination.droppableId) {
       const newDestination = Array.from(board[destination.droppableId]);
       const [item] = newDestination.splice(source.index, 1);
       newDestination.splice(destination.index, 0, item);
       const newBoard = { ...board };
+      newBoard[destination.droppableId] = newDestination;
+      setBoard(newBoard);
+    } else {
+      const newSource = Array.from(board[source.droppableId]);
+      const newDestination = Array.from(board[destination.droppableId]);
+      const [item] = newSource.splice(source.index, 1);
+      newDestination.splice(destination.index, 0, item);
+      const newBoard = { ...board };
+      newBoard[source.droppableId] = newSource;
       newBoard[destination.droppableId] = newDestination;
       setBoard(newBoard);
     }
@@ -72,21 +77,14 @@ const App = () => {
           setBoard(newBoard);
         } else {
           const newSource = Array.from(board[source.droppableId]);
-          console.log('newSource');
-          console.log(newSource);
           const newDestination = Array.from(board[destination.droppableId]);
-          console.log('newDestination');
-          console.log(newDestination);
           const [item] = newSource.splice(source.index, 1);
-          console.log('item');
-          console.log(item);
           newDestination.splice(destination.index, 0, item);
-          console.log('newSource');
-          console.log(newSource);
-          console.log('newDestination');
-          console.log(newDestination);
+          const newBoard = { ...board };
+          newBoard[source.droppableId] = newSource;
+          newBoard[destination.droppableId] = newDestination;
+          setBoard(newBoard);
         }
-        // setBoard(newBoard);
       });
   };
 
@@ -99,7 +97,15 @@ const App = () => {
         Authorization: 'Bearer 7DSOEMHZ7GMHATJ67VP3LPSHBE',
       },
       body: JSON.stringify({ content: newTaskInputRef.current?.value }),
-    });
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const arr = Array.from(board['TODO']);
+        arr.push(data.data);
+        const newBoard = { ...board };
+        newBoard['TODO'] = arr;
+        setBoard(newBoard);
+      });
   };
 
   useEffect(() => {
@@ -148,7 +154,10 @@ const App = () => {
                   ))}
                   {provided.placeholder}
                   {category === 'TODO' && (
-                    <form onSubmit={(e) => handleNewTask(e)}>
+                    <form
+                      onSubmit={(e) => {
+                        handleNewTask(e);
+                      }}>
                       <Input
                         width="100%"
                         ref={newTaskInputRef}
